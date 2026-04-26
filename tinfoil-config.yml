@@ -19,7 +19,7 @@ containers:
       - GATEWAY_ATTESTATION_REF: "https://turnstile-gateway.amotivv.containers.tinfoil.dev/.well-known/tinfoil-attestation"
       - GATEWAY_SIGSTORE_BUNDLE_REF: "github-release://theforkproject-dev/strata-turnstile-gateway/latest"
       - GATEWAY_IMAGE_DIGEST: "sha256:46bd092e8434610c599285e5ccc24a4c11dae85ce1e07a7b6a7b7213d47fd1b8"
-      - GATEWAY_TINFOIL_CONFIG_REF: "github://theforkproject-dev/strata-turnstile-gateway/tinfoil-config.yml@tinfoil-demo-001"
+      - GATEWAY_TINFOIL_CONFIG_REF: "github://theforkproject-dev/strata-turnstile-gateway/tinfoil-config.yml@v0.1.0-tinfoil-demo.1"
     command: ["node", "bin/turnstile-gateway.js"]
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
