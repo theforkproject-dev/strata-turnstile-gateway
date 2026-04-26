@@ -4,11 +4,12 @@ memory: 8192
 
 containers:
   - name: "gateway"
-    image: "ghcr.io/theforkproject-dev/strata-ebo-turnstile:tinfoil-demo-001@sha256:46bd092e8434610c599285e5ccc24a4c11dae85ce1e07a7b6a7b7213d47fd1b8"
+    image: "ghcr.io/theforkproject-dev/strata-ebo-turnstile:tinfoil-demo-002@sha256:ad8ef20c233d7da49cc7cee81b337c8980dac6ea4b83bbbd5a45a6fa07e1d988"
     env:
       - PORT: "8080"
       - HOST: "0.0.0.0"
       - TURNSTILE_DATA_DIR: "/mnt/ramdisk/turnstile"
+      - DEMO_RESET_ENABLED: "true"
       - GATEWAY_KEY_ID: "gateway:tinfoil-demo"
       - TOOL_KEY_ID: "tool:payments-api:tinfoil-demo"
       - TRANSPARENCY_KEY_ID: "transparency:tinfoil-demo"
@@ -18,8 +19,8 @@ containers:
       - EGRESS_POLICY_ENFORCEMENT: "application-code-typed-adapters"
       - GATEWAY_ATTESTATION_REF: "https://turnstile-gateway.amotivv.containers.tinfoil.dev/.well-known/tinfoil-attestation"
       - GATEWAY_SIGSTORE_BUNDLE_REF: "github-release://theforkproject-dev/strata-turnstile-gateway/latest"
-      - GATEWAY_IMAGE_DIGEST: "sha256:46bd092e8434610c599285e5ccc24a4c11dae85ce1e07a7b6a7b7213d47fd1b8"
-      - GATEWAY_TINFOIL_CONFIG_REF: "github://theforkproject-dev/strata-turnstile-gateway/tinfoil-config.yml@v0.1.0-tinfoil-demo.1"
+      - GATEWAY_IMAGE_DIGEST: "sha256:ad8ef20c233d7da49cc7cee81b337c8980dac6ea4b83bbbd5a45a6fa07e1d988"
+      - GATEWAY_TINFOIL_CONFIG_REF: "github://theforkproject-dev/strata-turnstile-gateway/tinfoil-config.yml@v0.1.0-tinfoil-demo.2"
     command: ["node", "bin/turnstile-gateway.js"]
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
@@ -38,6 +39,7 @@ shim:
     - /v1/admission-manifest
     - /v1/verifier-profile
     - /v1/egress-policy
+    - /v1/demo/reset
     - /v1/receipts
     - /v1/transparency-log
     - /v1/sessions
