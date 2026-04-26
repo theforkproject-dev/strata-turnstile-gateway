@@ -1,31 +1,46 @@
-# Tinfoil Container Configuration
-# This file will be auto-populated when you deploy via the Tinfoil dashboard.
-# You can also edit it manually - see docs at https://docs.tinfoil.sh/containers/config
-#
-# After creating this repo from the template:
-# 1. Go to https://dash.tinfoil.sh and create a new container
-# 2. Provide this repository URL and your container details
-# 3. This file will be automatically updated with your deployment settings
-#
-# For updates: edit this file, commit, and push a new tag (e.g., v2)
-
 cvm-version: 0.7.5
 cpus: 2
 memory: 8192
 
-# Container configuration
-# Note: image must include SHA256 hash (e.g., image:tag@sha256:abc123...)
 containers:
-  - name: "app"
-    image: "your-image:tag@sha256:..."
+  - name: "gateway"
+    image: "ghcr.io/theforkproject-dev/strata-ebo-turnstile:tinfoil-demo-001@sha256:46bd092e8434610c599285e5ccc24a4c11dae85ce1e07a7b6a7b7213d47fd1b8"
     env:
-      - LOG_LEVEL: "info"
-    secrets:
-      - API_KEY
-    command: ["--port", "8000"]
+      - PORT: "8080"
+      - HOST: "0.0.0.0"
+      - TURNSTILE_DATA_DIR: "/mnt/ramdisk/turnstile"
+      - GATEWAY_KEY_ID: "gateway:tinfoil-demo"
+      - TOOL_KEY_ID: "tool:payments-api:tinfoil-demo"
+      - TRANSPARENCY_KEY_ID: "transparency:tinfoil-demo"
+      - WITNESS_URLS: "w1=https://turnstile-witness-1.amotivv.containers.tinfoil.dev,w2=https://turnstile-witness-2.amotivv.containers.tinfoil.dev,w3=https://turnstile-witness-3.amotivv.containers.tinfoil.dev"
+      - EGRESS_POLICY_MODE: "witness-urls-only"
+      - EGRESS_POLICY_REF: "tinfoil-config.yml:containers[0].env.WITNESS_URLS"
+      - EGRESS_POLICY_ENFORCEMENT: "application-code-typed-adapters"
+      - GATEWAY_ATTESTATION_REF: "https://turnstile-gateway.amotivv.containers.tinfoil.dev/.well-known/tinfoil-attestation"
+      - GATEWAY_SIGSTORE_BUNDLE_REF: "github-release://theforkproject-dev/strata-turnstile-gateway/latest"
+      - GATEWAY_IMAGE_DIGEST: "sha256:46bd092e8434610c599285e5ccc24a4c11dae85ce1e07a7b6a7b7213d47fd1b8"
+      - GATEWAY_TINFOIL_CONFIG_REF: "github://theforkproject-dev/strata-turnstile-gateway/tinfoil-config.yml@tinfoil-demo-001"
+    command: ["node", "bin/turnstile-gateway.js"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    restart: always
 
-# Shim configuration (adjust upstream-port and paths to match your container)
 shim:
-  upstream-port: 8000
+  upstream-port: 8080
   paths:
     - /health
+    - /v1/public-key
+    - /v1/keyring
+    - /v1/admission-manifest
+    - /v1/verifier-profile
+    - /v1/egress-policy
+    - /v1/receipts
+    - /v1/transparency-log
+    - /v1/sessions
+    - /v1/sessions/end
+    - /v1/actions
+    - /v1/checkpoints
